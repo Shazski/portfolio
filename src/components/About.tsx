@@ -1,4 +1,6 @@
 import { motion } from 'framer-motion';
+import CountUp from './CountUp';
+import SplitText from './SplitText';
 
 const stats = [
   { num: '40%', label: 'dev effort cut by internal tooling' },
@@ -18,10 +20,10 @@ export default function About() {
   return (
     <section id="about">
       <motion.div {...fade(0)}>
-        <div className="section-eyebrow">01 / about</div>
-        <h2 className="section-title">
-          Full stack engineer with a backend lean. <span className="dim">I work across the stack but spend most of my time where the data, queries and infrastructure live.</span>
-        </h2>
+        <div className="section-eyebrow"><span className="eyebrow-line" /> 01 / about</div>
+        <SplitText as="h2" className="section-title">
+          Full stack engineer with a backend lean. I work across the stack but spend most of my time where the data, queries and infrastructure live.
+        </SplitText>
       </motion.div>
 
       <div className="about-grid">
@@ -49,11 +51,18 @@ export default function About() {
         </motion.div>
 
         <motion.div className="stats" {...fade(0.2)}>
-          {stats.map((s) => (
-            <div className="stat" key={s.label}>
-              <span className="num">{s.num}</span>
+          {stats.map((s, i) => (
+            <motion.div
+              className="stat"
+              key={s.label}
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.6 }}
+              transition={{ duration: 0.6, delay: 0.25 + i * 0.08, ease: [0.22, 1, 0.36, 1] as const }}
+            >
+              <span className="num"><CountUp value={s.num} /></span>
               <span className="label">{s.label}</span>
-            </div>
+            </motion.div>
           ))}
         </motion.div>
       </div>

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import SplitText from './SplitText';
 
 const items = [
   {
@@ -47,8 +48,8 @@ export default function Experience() {
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.7 }}
       >
-        <div className="section-eyebrow">04 / experience</div>
-        <h2 className="section-title">Where I've spent my engineering hours.</h2>
+        <div className="section-eyebrow"><span className="eyebrow-line" /> 04 / experience</div>
+        <SplitText as="h2" className="section-title">Where I've spent my engineering hours.</SplitText>
       </motion.div>
 
       <div className="exp">
@@ -59,7 +60,7 @@ export default function Experience() {
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.5, delay: i * 0.06 }}
+            transition={{ duration: 0.55, delay: i * 0.06 }}
           >
             <div className="when">{it.when}</div>
             <div>
@@ -68,8 +69,16 @@ export default function Experience() {
               {it.context && <div className="company-context">{it.context}</div>}
             </div>
             <ul>
-              {it.bullets.map((b) => (
-                <li key={b}>{b}</li>
+              {it.bullets.map((b, bi) => (
+                <motion.li
+                  key={b}
+                  initial={{ opacity: 0, x: 12 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, amount: 0.4 }}
+                  transition={{ duration: 0.45, delay: 0.1 + bi * 0.05 }}
+                >
+                  {b}
+                </motion.li>
               ))}
             </ul>
           </motion.div>
