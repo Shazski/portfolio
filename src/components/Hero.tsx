@@ -50,6 +50,13 @@ export default function Hero() {
           <MagneticButton href="#projects" className="btn btn-primary">
             View work <span className="arrow">→</span>
           </MagneticButton>
+          <MagneticButton
+            href="/Sharoon-Resume.pdf"
+            download="Sharoon-Resume.pdf"
+            className="btn"
+          >
+            Download CV <span className="arrow">↓</span>
+          </MagneticButton>
           <MagneticButton href="#contact" className="btn">
             Get in touch
           </MagneticButton>

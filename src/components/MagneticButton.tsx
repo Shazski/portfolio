@@ -8,9 +8,22 @@ type Props = {
   children: ReactNode;
   strength?: number;
   style?: CSSProperties;
+  download?: string | boolean;
+  target?: string;
+  rel?: string;
 };
 
-export default function MagneticButton({ as = 'a', href, className, children, strength = 0.35, style }: Props) {
+export default function MagneticButton({
+  as = 'a',
+  href,
+  className,
+  children,
+  strength = 0.35,
+  style,
+  download,
+  target,
+  rel,
+}: Props) {
   const ref = useRef<HTMLElement | null>(null);
 
   const onMove = (e: MouseEvent) => {
@@ -38,6 +51,9 @@ export default function MagneticButton({ as = 'a', href, className, children, st
       onMouseMove={onMove}
       onMouseLeave={onLeave}
       style={style}
+      download={download as never}
+      target={target}
+      rel={rel}
     >
       <span className="magnetic-inner">{children}</span>
     </MotionTag>
