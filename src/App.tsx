@@ -13,6 +13,7 @@ import Loader from './components/Loader';
 import MouseAura from './components/MouseAura';
 import AuroraBackground from './components/AuroraBackground';
 import SmoothScroll from './components/SmoothScroll';
+import PortfolioChat from './components/PortfolioChat';
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
           <span>Built with React &amp; Three.js</span>
         </footer>
       </div>
+      <PortfolioChat />
     </div>
   );
 }
