@@ -14,6 +14,8 @@ import MouseAura from './components/MouseAura';
 import AuroraBackground from './components/AuroraBackground';
 import SmoothScroll from './components/SmoothScroll';
 import PortfolioChat from './components/PortfolioChat';
+import AISection from './components/AISection';
+import CommandPalette from './components/CommandPalette';
 
 export default function App() {
   return (
@@ -33,6 +35,7 @@ export default function App() {
         <About />
         <Marquee />
         <Skills />
+        <AISection />
         <Projects />
         <Experience />
         <Contact />
@@ -42,6 +45,7 @@ export default function App() {
         </footer>
       </div>
       <PortfolioChat />
+      <CommandPalette />
     </div>
   );
 }

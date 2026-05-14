@@ -7,6 +7,7 @@ type Msg = {
   who: 'user' | 'bot';
   text: string;
   suggestions?: string[];
+  streaming?: boolean;
 };
 
 const seed = (): Msg => ({
@@ -17,22 +18,85 @@ const seed = (): Msg => ({
   suggestions: SUGGESTED_PROMPTS,
 });
 
+type SR = {
+  new (): SpeechRecognitionInstance;
+};
+type SpeechRecognitionInstance = {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start: () => void;
+  stop: () => void;
+  onresult: ((e: { results: { [k: number]: { [k: number]: { transcript: string } } } }) => void) | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
+};
+
 export default function PortfolioChat() {
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>([seed()]);
   const [input, setInput] = useState('');
   const [typing, setTyping] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const recRef = useRef<SpeechRecognitionInstance | null>(null);
+  const streamTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    const w = window as unknown as { SpeechRecognition?: SR; webkitSpeechRecognition?: SR };
+    setVoiceSupported(!!(w.SpeechRecognition || w.webkitSpeechRecognition));
+  }, []);
 
   useEffect(() => {
     if (open && inputRef.current) inputRef.current.focus();
   }, [open]);
 
   useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const isCmdK = (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k';
+      if (isCmdK) {
+        e.preventDefault();
+        setOpen((o) => !o);
+        return;
+      }
+      if (e.key === 'Escape' && open) setOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  useEffect(() => {
     const el = scrollerRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [msgs, typing, open]);
+
+  function streamReply(botId: string, reply: Reply) {
+    const words = reply.text.split(/(\s+)/);
+    let idx = 0;
+    if (streamTimerRef.current) clearInterval(streamTimerRef.current);
+    streamTimerRef.current = setInterval(() => {
+      idx += 2; // word + whitespace pair
+      const partial = words.slice(0, idx).join('');
+      setMsgs((m) =>
+        m.map((msg) =>
+          msg.id === botId
+            ? {
+                ...msg,
+                text: partial,
+                streaming: idx < words.length,
+                suggestions: idx >= words.length ? reply.suggestions : undefined,
+              }
+            : msg
+        )
+      );
+      if (idx >= words.length && streamTimerRef.current) {
+        clearInterval(streamTimerRef.current);
+        streamTimerRef.current = null;
+      }
+    }, 28);
+  }
 
   function send(text: string) {
     const userMsg: Msg = { id: `u-${Date.now()}`, who: 'user', text };
@@ -41,14 +105,13 @@ export default function PortfolioChat() {
     setTyping(true);
 
     const reply: Reply = answer(text);
-    const delay = 400 + Math.min(1200, reply.text.length * 8);
+    const preDelay = 380 + Math.min(700, reply.text.length * 2);
     setTimeout(() => {
-      setMsgs((m) => [
-        ...m,
-        { id: `b-${Date.now()}`, who: 'bot', text: reply.text, suggestions: reply.suggestions },
-      ]);
       setTyping(false);
-    }, delay);
+      const botId = `b-${Date.now()}`;
+      setMsgs((m) => [...m, { id: botId, who: 'bot', text: '', streaming: true }]);
+      streamReply(botId, reply);
+    }, preDelay);
   }
 
   function onSubmit(e: FormEvent) {
@@ -59,12 +122,38 @@ export default function PortfolioChat() {
   }
 
   function reset() {
+    if (streamTimerRef.current) clearInterval(streamTimerRef.current);
     setMsgs([seed()]);
+  }
+
+  function toggleVoice() {
+    const w = window as unknown as { SpeechRecognition?: SR; webkitSpeechRecognition?: SR };
+    const SRCtor = w.SpeechRecognition || w.webkitSpeechRecognition;
+    if (!SRCtor) return;
+    if (recording && recRef.current) {
+      recRef.current.stop();
+      setRecording(false);
+      return;
+    }
+    const rec = new SRCtor();
+    rec.continuous = false;
+    rec.interimResults = false;
+    rec.lang = 'en-US';
+    rec.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      // auto-submit on voice
+      setTimeout(() => send(transcript), 200);
+    };
+    rec.onend = () => setRecording(false);
+    rec.onerror = () => setRecording(false);
+    rec.start();
+    recRef.current = rec;
+    setRecording(true);
   }
 
   return (
     <>
-      {/* Launcher */}
       <motion.button
         className={`chat-launcher ${open ? 'is-open' : ''}`}
         onClick={() => setOpen((o) => !o)}
@@ -72,6 +161,7 @@ export default function PortfolioChat() {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         aria-label={open ? 'Close chat' : 'Open chat'}
+        title="Ask AI (⌘K)"
       >
         <span className="chat-launcher-pulse" />
         {open ? (
@@ -87,7 +177,6 @@ export default function PortfolioChat() {
         <span className="chat-launcher-label">{open ? 'Close' : 'Ask AI'}</span>
       </motion.button>
 
-      {/* Panel */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -108,7 +197,7 @@ export default function PortfolioChat() {
                 <div>
                   <div className="chat-head-name">Sharoon AI</div>
                   <div className="chat-head-status">
-                    <span className="chat-dot" /> online · portfolio-trained
+                    <span className="chat-dot" /> online · streaming · portfolio-trained
                   </div>
                 </div>
               </div>
@@ -118,8 +207,11 @@ export default function PortfolioChat() {
             <div className="chat-scroller" ref={scrollerRef}>
               {msgs.map((m) => (
                 <div key={m.id} className={`chat-msg chat-msg--${m.who}`}>
-                  <div className="chat-bubble">{m.text}</div>
-                  {m.suggestions && m.suggestions.length > 0 && (
+                  <div className="chat-bubble">
+                    {m.text}
+                    {m.streaming && m.who === 'bot' && <span className="chat-caret">▍</span>}
+                  </div>
+                  {m.suggestions && m.suggestions.length > 0 && !m.streaming && (
                     <div className="chat-suggestions">
                       {m.suggestions.map((s) => (
                         <button key={s} className="chat-chip" onClick={() => send(s)} type="button">
@@ -145,9 +237,24 @@ export default function PortfolioChat() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about projects, stack, or experience..."
+                placeholder={recording ? 'Listening…' : 'Ask about projects, stack, or experience...'}
                 aria-label="Message"
               />
+              {voiceSupported && (
+                <button
+                  type="button"
+                  onClick={toggleVoice}
+                  className={`chat-mic ${recording ? 'is-recording' : ''}`}
+                  aria-label={recording ? 'Stop recording' : 'Start voice input'}
+                  title="Speak your question"
+                >
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="9" y="3" width="6" height="11" rx="3" />
+                    <path d="M5 11a7 7 0 0 0 14 0" strokeLinecap="round" />
+                    <path d="M12 18v3" strokeLinecap="round" />
+                  </svg>
+                </button>
+              )}
               <button type="submit" aria-label="Send" disabled={!input.trim()}>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M5 12l14-7-5 14-3-5-6-2z" strokeLinejoin="round" strokeLinecap="round" />

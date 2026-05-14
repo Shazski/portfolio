@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const sections = ['about', 'skills', 'projects', 'experience', 'contact'];
+const sections = ['about', 'skills', 'ai', 'projects', 'experience', 'contact'];
 
 export default function Navbar() {
   const [active, setActive] = useState<string>('about');
