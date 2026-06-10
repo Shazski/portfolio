@@ -62,7 +62,7 @@ function JobMatcherCard() {
                     <motion.circle
                       cx="50" cy="50" r="42"
                       fill="none"
-                      stroke={result.score >= 70 ? '#7fffdf' : result.score >= 40 ? '#5cdfff' : '#ffb84a'}
+                      style={{ stroke: result.score >= 40 ? 'var(--accent)' : '#ffb84a' }}
                       strokeWidth="6"
                       strokeLinecap="round"
                       transform="rotate(-90 50 50)"

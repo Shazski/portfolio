@@ -13,7 +13,7 @@ const groups = [
   { title: 'Architecture', items: ['Event-driven', 'State Machines', 'API Optimization', 'Performance Tuning', 'Connection Pooling', 'Caching', 'Backpressure', 'Idempotency', 'Rate Limiting', 'SSO / Auth'] },
   { title: 'Testing & QA', items: ['Unit Testing', 'Integration Testing', 'Jest', 'Postman', 'Manual QA', 'TDD'] },
   { title: 'Security', items: ['OAuth 2.0', 'JWT', 'Secure Cookies', 'CSRF Protection', 'OWASP Awareness', 'HTTPS / TLS'] },
-  { title: 'AI / LLM', items: ['LLM Integration', 'Prompt Engineering', 'OpenAI / Anthropic APIs', 'Embeddings', 'Vector Search', 'RAG'] },
+  { title: 'AI / LLM', items: ['Anthropic API', 'Gen AI', 'OpenAI'] },
   { title: 'Tools & Process', items: ['Agile', 'Scrum', 'Kanban', 'Jira', 'Confluence', 'Notion', 'Linear', 'Git', 'GitHub'] },
   { title: 'Problem Solving', items: ['Algorithmic Thinking', 'Performance Reasoning', 'System Debugging', 'Root-cause Analysis'] },
   { title: 'Engineering Leadership', items: ['Code Review', 'Mentoring', 'Tech Specs', 'Architecture Reviews', 'Observability', 'Cross-team Collaboration', 'Estimation'] },
@@ -42,12 +42,15 @@ function SkillCard({ g, i }: { g: typeof groups[number]; i: number }) {
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.5, delay: i * 0.04 }}
     >
-      <h3>{g.title}</h3>
-      <ul>
+      <div className="skill-card-head">
+        <span className="skill-card-index">{String(i + 1).padStart(2, '0')}</span>
+        <h3>{g.title}</h3>
+      </div>
+      <div className="skill-chips">
         {g.items.map((it) => (
-          <li key={it}>{it}</li>
+          <span className="skill-chip" key={it}>{it}</span>
         ))}
-      </ul>
+      </div>
     </motion.div>
   );
 }

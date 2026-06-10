@@ -16,6 +16,7 @@ import SmoothScroll from './components/SmoothScroll';
 import PortfolioChat from './components/PortfolioChat';
 import AISection from './components/AISection';
 import CommandPalette from './components/CommandPalette';
+import AccentSwitcher from './components/AccentSwitcher';
 
 export default function App() {
   return (
@@ -45,6 +46,7 @@ export default function App() {
       </div>
       <PortfolioChat />
       <CommandPalette />
+      <AccentSwitcher />
     </div>
   );
 }
