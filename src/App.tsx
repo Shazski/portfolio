@@ -41,7 +41,6 @@ export default function App() {
         <Contact />
         <footer>
           <span>© {new Date().getFullYear()} — Sharoon</span>
-          <span>Built with React &amp; Three.js</span>
         </footer>
       </div>
       <PortfolioChat />

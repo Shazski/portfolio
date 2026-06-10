@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <title>Sharoon — Resume</title>
 <style>
-  @page { size: A4; margin: 12mm 12mm 12mm 12mm; }
+  @page { size: A4; margin: 9mm 11mm 9mm 11mm; }
   * { box-sizing: border-box; }
   html, body {
     margin: 0;
@@ -12,8 +12,8 @@
     color: #000000;
     background: #ffffff;
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 10pt;
-    line-height: 1.35;
+    font-size: 9.5pt;
+    line-height: 1.28;
   }
   .header { text-align: center; margin-bottom: 8px; }
   .name {
@@ -37,7 +37,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    margin: 10px 0 4px;
+    margin: 8px 0 3px;
     padding: 0 0 2px;
     border-bottom: 1px solid #000000;
   }
@@ -97,9 +97,11 @@
     Software engineer with a strong backend focus. Build production systems end-to-end &mdash;
     REST APIs, event-driven services, data pipelines, and cloud infrastructure on Node.js, NestJS,
     MongoDB, AWS, and GCP, with frontend work in Angular and React. Experienced across architecture,
-    implementation, optimization, deployment, and production support. Track record of shipping
-    AI-driven systems, serverless orchestrations, large-scale data migrations, and internal
-    developer tooling that measurably improves team velocity.
+    implementation, optimization, deployment, and production support. Track record of owning
+    performance, scalability, and reliability &mdash; eliminating API crashes under high-volume
+    load, cutting multi-second queries to sub-second, and shipping AI-driven systems, serverless
+    orchestrations, large-scale data migrations, and internal developer tooling that measurably
+    improves team velocity.
   </p>
 
   <h2>Experience</h2>
@@ -114,6 +116,8 @@
     <li>Designed serverless workflows on AWS Step Functions and Lambda to replace fragile cron pipelines &mdash; multi-stage jobs with retries, parallel branches, durable state, and dead-letter queues.</li>
     <li>Owned the GCP Pub/Sub internal notification system with topic-per-event design, idempotent handlers, and a thin SDK for easy adoption across services.</li>
     <li>Owned the LinkedIn Marketing API integration end-to-end &mdash; rate-aware sync, data normalization, and tuned MongoDB aggregations that keep dashboard P95 under 200ms.</li>
+    <li>Owned performance, scalability, and reliability: eliminated API crashes under ~2,000 req/sec CRM sync load by offloading ingestion to a BullMQ + Redis queue (HTTP 202 in ms), and cut a Sales Activity API over ~7.5M records from 50s+ (504 timeouts) to 2&ndash;3s (~20x faster).</li>
+    <li>Built a shared Redis connection pool (bounded 10&ndash;500) to end connection leaks and exhaustion fleet-wide, and fixed a pagination data-integrity bug via a deterministic sort tiebreaker and idempotent upserts.</li>
     <li>Built Angular frontend surfaces for the ROI analytics and integration features delivered on the backend; operated services at 99.9% uptime.</li>
   </ul>
 
@@ -137,8 +141,7 @@
       <span class="project-context">Recotap and AdRadar</span>
     </div>
     <ul>
-      <li>Designed an LLM-backed classification pipeline that scores candidate entities with auditable, reviewable reasoning.</li>
-      <li>Built confidence-threshold routing for human review and a feedback loop for continuous improvement.</li>
+      <li>Designed an LLM-backed classification pipeline that scores candidate entities with auditable reasoning, with confidence-threshold routing for human review.</li>
       <li>Integrated decisions directly into the campaign delivery flow so blocks take effect in the next ad-serving cycle.</li>
     </ul>
     <div class="project-tech"><b>Tech:</b> Node.js, NestJS, TypeScript, MongoDB, LLM APIs, AWS Lambda</div>
@@ -151,8 +154,7 @@
     </div>
     <ul>
       <li>Modeled long-running multi-stage jobs as AWS Step Function state machines with explicit retry and failure transitions.</li>
-      <li>Broke heavy work into parallel Lambda tasks; added dead-letter queues and CloudWatch alarms for immediate failure visibility.</li>
-      <li>Made state durable so jobs survive Lambda timeouts and resume from the last completed step.</li>
+      <li>Broke heavy work into parallel Lambda tasks with dead-letter queues and CloudWatch alarms; made state durable so jobs survive timeouts and resume from the last completed step.</li>
     </ul>
     <div class="project-tech"><b>Tech:</b> AWS Lambda, Step Functions, CloudWatch, Node.js, TypeScript</div>
   </div>
@@ -164,8 +166,7 @@
     </div>
     <ul>
       <li>Designed a topic-per-event model so producers publish without coupling to consumers.</li>
-      <li>Built idempotent handlers, dead-letter routing, and structured retries for resilient delivery.</li>
-      <li>Shipped a thin internal SDK so any service can publish or subscribe in a few lines of code.</li>
+      <li>Built idempotent handlers, dead-letter routing, and structured retries, plus a thin internal SDK so any service can publish or subscribe in a few lines of code.</li>
     </ul>
     <div class="project-tech"><b>Tech:</b> GCP Pub/Sub, Node.js, NestJS, TypeScript</div>
   </div>
@@ -176,11 +177,34 @@
       <span class="project-context">Recotap and AdRadar</span>
     </div>
     <ul>
-      <li>Built a rate-aware LinkedIn Marketing API sync that respects quota and resumes cleanly from interruption.</li>
-      <li>Normalized campaign, creative, spend, and outcome data into a query-friendly schema.</li>
+      <li>Built a rate-aware LinkedIn Marketing API sync that respects quota and resumes cleanly from interruption, normalizing campaign, spend, and outcome data into a query-friendly schema.</li>
       <li>Designed aggregations and indexes tuned to the ROI dashboard access pattern, keeping P95 under 200ms; built the Angular ROI graph.</li>
     </ul>
     <div class="project-tech"><b>Tech:</b> LinkedIn Marketing API, MongoDB, Aggregation Pipeline, Angular, Node.js</div>
+  </div>
+
+  <div class="project">
+    <div class="project-head">
+      <span class="project-name">High-Volume CRM Sync Offload (BullMQ Queue)</span>
+      <span class="project-context">Recotap and AdRadar</span>
+    </div>
+    <ul>
+      <li>Diagnosed API crashes from a synchronous CRM sales-activity endpoint hit at ~2,000 req/sec (~500 records each), exhausting the tenant DB connection pool and spiking MongoDB CPU.</li>
+      <li>Re-architected it to enqueue a job and return HTTP 202 in milliseconds via a dedicated BullMQ + Redis queue (bounded concurrency, backoff, retries) &mdash; database load now stays flat regardless of inbound spikes.</li>
+    </ul>
+    <div class="project-tech"><b>Tech:</b> BullMQ, Redis, Node.js, NestJS, MongoDB, TypeScript</div>
+  </div>
+
+  <div class="project">
+    <div class="project-head">
+      <span class="project-name">Sales Activity API Optimization (50s+ to 2&ndash;3s)</span>
+      <span class="project-context">Recotap and AdRadar</span>
+    </div>
+    <ul>
+      <li>A search, pagination, and total-count list API over ~7.5M records took 50s+ and routinely threw 504 Gateway Timeouts on large tenants.</li>
+      <li>Replaced unindexed $regex full-collection scans with index-backed cached lookups, redesigned compound indexes with query hints and maxTimeMS guards, and parallelized count/data queries with short-TTL caching &mdash; cut latency ~20x, eliminated 504s, and sharply reduced MongoDB CPU.</li>
+    </ul>
+    <div class="project-tech"><b>Tech:</b> MongoDB, Indexing, Aggregation Pipeline, Redis, Node.js, NestJS</div>
   </div>
 
   <div class="project">
@@ -189,8 +213,7 @@
       <span class="project-context">Haiku</span>
     </div>
     <ul>
-      <li>Mapped Airtable bases to a MongoDB schema designed around production query patterns.</li>
-      <li>Built a batched ETL with checkpointing and a dual-write phase to validate the new system before cutover.</li>
+      <li>Mapped Airtable bases to a MongoDB schema designed around production query patterns; built a batched ETL with checkpointing and a dual-write phase to validate before cutover.</li>
       <li>Wrote validation scripts comparing row counts and field hashes between source and target (100% data parity).</li>
     </ul>
     <div class="project-tech"><b>Tech:</b> MongoDB, Airtable API, Node.js, TypeScript, Batched ETL</div>
@@ -202,8 +225,7 @@
       <span class="project-context">Haiku</span>
     </div>
     <ul>
-      <li>Extracted the most common filter, projection, and aggregation patterns into reusable, composable primitives.</li>
-      <li>Designed a typed API where queries are built declaratively and verified at compile time.</li>
+      <li>Extracted common filter, projection, and aggregation patterns into a typed, composable API where queries are built declaratively and verified at compile time.</li>
       <li>Rolled it out gradually with adoption docs and migration examples &mdash; reduced query-writing effort by approximately 40%.</li>
     </ul>
     <div class="project-tech"><b>Tech:</b> MongoDB, TypeScript, Node.js</div>
@@ -216,8 +238,7 @@
     </div>
     <ul>
       <li>Issued short-lived signed tokens that one domain can exchange for a full session on another.</li>
-      <li>Built the cross-domain handshake with CSRF protection and strict origin validation.</li>
-      <li>Added silent re-authentication for transparent session refresh with graceful fallback to native login.</li>
+      <li>Built the cross-domain handshake with CSRF protection and strict origin validation, plus silent re-authentication for transparent session refresh with graceful fallback to native login.</li>
     </ul>
     <div class="project-tech"><b>Tech:</b> Node.js, JWT, Secure Cookies, TypeScript</div>
   </div>
@@ -226,11 +247,11 @@
   <p class="skill-line"><b>Languages:</b> TypeScript, JavaScript, SQL</p>
   <p class="skill-line"><b>Backend:</b> Node.js, NestJS, Express.js, REST APIs, API Gateway, Microservices</p>
   <p class="skill-line"><b>Frontend:</b> Angular, React, HTML, CSS, Bootstrap</p>
-  <p class="skill-line"><b>Databases:</b> MongoDB, Aggregation Pipeline, Indexing, Bulk Operations, Airtable</p>
-  <p class="skill-line"><b>Messaging and Streaming:</b> Kafka, RabbitMQ, GCP Pub/Sub</p>
+  <p class="skill-line"><b>Databases:</b> MongoDB, Aggregation Pipeline, Indexing, Query &amp; CPU Optimization, Bulk Operations, Redis, Airtable</p>
+  <p class="skill-line"><b>Messaging and Queues:</b> BullMQ, Kafka, RabbitMQ, GCP Pub/Sub</p>
   <p class="skill-line"><b>Cloud and Serverless:</b> AWS Lambda, AWS Step Functions, GCP, Vercel</p>
   <p class="skill-line"><b>DevOps:</b> Docker, Kubernetes, CI/CD Pipelines, Production Debugging</p>
-  <p class="skill-line"><b>Architecture:</b> Event-Driven Design, State Machines, API Optimization, SSO and Authentication</p>
+  <p class="skill-line"><b>Architecture:</b> Event-Driven Design, State Machines, Performance &amp; Reliability Tuning, API Optimization, Connection Pooling, SSO and Authentication</p>
   <p class="skill-line"><b>Engineering Leadership:</b> Code Review, Mentoring, Technical Specifications, Architecture Reviews, Observability, Cross-Team Collaboration</p>
 
 </body>

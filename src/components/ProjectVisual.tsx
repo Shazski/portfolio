@@ -33,9 +33,13 @@ function visualKind(num: string) {
     case '02': return 'step functions · state machine';
     case '03': return 'pub/sub · fan-out';
     case '04': return 'roi · aggregation';
-    case '05': return 'etl · migration';
-    case '06': return 'query · composable api';
-    case '07': return 'sso · cross-domain';
+    case '05': return 'bullmq · async queue';
+    case '06': return 'index + cache · 50s → 2–3s';
+    case '07': return 'redis · connection pool';
+    case '08': return 'pagination · deterministic sort';
+    case '09': return 'etl · migration';
+    case '10': return 'query · composable api';
+    case '11': return 'sso · cross-domain';
     default: return 'system';
   }
 }
@@ -46,9 +50,13 @@ function renderVisual(num: string) {
     case '02': return <StateMachineViz />;
     case '03': return <PubSubViz />;
     case '04': return <RoiViz />;
-    case '05': return <MigrationViz />;
-    case '06': return <QueryViz />;
-    case '07': return <SsoViz />;
+    case '05': return <QueueViz />;
+    case '06': return <QueryPerfViz />;
+    case '07': return <PoolViz />;
+    case '08': return <PaginationViz />;
+    case '09': return <MigrationViz />;
+    case '10': return <QueryViz />;
+    case '11': return <SsoViz />;
     default: return null;
   }
 }
@@ -232,6 +240,259 @@ function RoiViz() {
 
       <text x="60" y="42" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="rgba(255,255,255,0.4)">ROI · 12 WEEKS</text>
       <text x="500" y="42" fontFamily="JetBrains Mono, monospace" fontSize="10" fill="#4ade80">+312%</text>
+    </g>
+  );
+}
+
+// 05 — High-volume CRM sync offloaded to a BullMQ queue.
+// Burst of requests → API returns 202 instantly → buffered in the queue →
+// drained by a bounded pool of workers at a steady rate → DB load stays flat.
+function QueueViz() {
+  const reqs = [0, 1, 2, 3, 4];
+  const workers = [110, 160, 210];
+  const jobs = [0, 1, 2, 3];
+  return (
+    <g>
+      {/* incoming burst */}
+      <text x="34" y="44" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="rgba(255,255,255,0.45)">CRM SYNC · ~2000/s</text>
+      {reqs.map((i) => (
+        <motion.rect
+          key={i}
+          x="34" y={62 + i * 36} width="58" height="24" rx="3"
+          fill="none" stroke="rgba(239,68,68,0.35)"
+          initial={{ opacity: 0, x: -8 }}
+          animate={{ opacity: [0, 1, 1], x: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 + i * 0.08, ease }}
+        />
+      ))}
+
+      {drawPath('M 92 150 L 138 150', 0.5)}
+
+      {/* API returns 202 immediately */}
+      <motion.g initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6, duration: 0.5 }} style={{ transformOrigin: '178px 150px' }}>
+        <rect x="138" y="118" width="80" height="64" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.3)" />
+        <text x="178" y="144" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="10" fill="rgba(255,255,255,0.85)">API</text>
+        <text x="178" y="162" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="rgba(74,222,128,0.9)">202</text>
+      </motion.g>
+
+      {drawPath('M 218 150 L 268 150', 0.8)}
+
+      {/* BullMQ queue buffer */}
+      <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9, duration: 0.5 }}>
+        <rect x="268" y="120" width="96" height="60" rx="6" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.28)" />
+        <text x="316" y="112" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="rgba(255,255,255,0.5)">BULLMQ</text>
+        {jobs.map((j) => (
+          <motion.rect
+            key={j}
+            x={278 + j * 20} y="138" width="14" height="24" rx="2"
+            fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.35)"
+            animate={{ opacity: [0.3, 1, 0.3] }}
+            transition={{ duration: 1.8, repeat: Infinity, delay: j * 0.25 }}
+          />
+        ))}
+      </motion.g>
+
+      {/* bounded workers (concurrency 3) */}
+      {workers.map((y, i) => (
+        <g key={i}>
+          {drawPath(`M 364 150 Q 400 ${y} 436 ${y}`, 1.1 + i * 0.1)}
+          {node(458, y, `W${i + 1}`, 1.3 + i * 0.1, 18)}
+        </g>
+      ))}
+      <text x="458" y="248" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="8" fill="rgba(255,255,255,0.4)">concurrency 3</text>
+
+      {/* DB — flat load */}
+      <motion.g initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.5, duration: 0.5 }}>
+        <rect x="510" y="120" width="74" height="60" rx="6" fill="rgba(74,222,128,0.05)" stroke="rgba(74,222,128,0.35)" />
+        <text x="547" y="146" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="10" fill="rgba(74,222,128,0.9)">DB</text>
+        <text x="547" y="164" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="8" fill="rgba(255,255,255,0.5)">flat load</text>
+      </motion.g>
+      {workers.map((y, i) => drawPath(`M 476 ${y} Q 500 ${y} 510 150`, 1.6 + i * 0.1))}
+
+      {/* steady drain pulse from queue → workers */}
+      {workers.map((y, i) => (
+        <motion.circle
+          key={i}
+          r="3" fill="#4ade80"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 1, 1, 0], cx: [364, 458], cy: [150, y] }}
+          transition={{ duration: 1.4, delay: 2 + i * 0.4, repeat: Infinity, repeatDelay: 1.2, ease: 'easeInOut' }}
+        />
+      ))}
+    </g>
+  );
+}
+
+// 06 — A 50s+ list API over ~7.5M records cut to 2–3s.
+// Before: full-collection-scan $regex + 504. After: index + cache → fast.
+function QueryPerfViz() {
+  return (
+    <g>
+      <text x="40" y="44" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="rgba(255,255,255,0.45)">SALES ACTIVITY · ~7.5M DOCS</text>
+
+      {/* BEFORE */}
+      <text x="40" y="92" fontFamily="JetBrains Mono, monospace" fontSize="10" fill="rgba(255,255,255,0.5)">BEFORE</text>
+      <text x="40" y="110" fontFamily="JetBrains Mono, monospace" fontSize="8" fill="rgba(239,68,68,0.7)">$regex · COLLSCAN</text>
+      <rect x="150" y="80" width="410" height="28" rx="4" fill="rgba(239,68,68,0.04)" stroke="rgba(239,68,68,0.18)" />
+      <motion.rect
+        x="150" y="80" height="28" rx="4"
+        fill="rgba(239,68,68,0.18)" stroke="rgba(239,68,68,0.5)"
+        initial={{ width: 0 }} animate={{ width: 410 }}
+        transition={{ duration: 1.6, delay: 0.2, ease }}
+      />
+      <motion.text
+        x="370" y="99" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="rgba(255,68,68,0.95)"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }}
+      >
+        50s+  ·  504 TIMEOUT
+      </motion.text>
+
+      {/* pipeline applied */}
+      <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.9, duration: 0.5 }}>
+        {['INDEX', 'CACHE', '∥ COUNT'].map((t, i) => (
+          <g key={t}>
+            <rect x={150 + i * 110} y="150" width="92" height="34" rx="4" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.3)" />
+            <text x={196 + i * 110} y="171" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="10" fill="rgba(255,255,255,0.85)">{t}</text>
+          </g>
+        ))}
+        <text x="490" y="171" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="rgba(255,255,255,0.45)">SWR · TTL</text>
+      </motion.g>
+
+      {/* AFTER */}
+      <text x="40" y="236" fontFamily="JetBrains Mono, monospace" fontSize="10" fill="rgba(255,255,255,0.5)">AFTER</text>
+      <text x="40" y="254" fontFamily="JetBrains Mono, monospace" fontSize="8" fill="rgba(74,222,128,0.75)">IXSCAN · cached</text>
+      <rect x="150" y="224" width="410" height="28" rx="4" fill="rgba(74,222,128,0.04)" stroke="rgba(74,222,128,0.18)" />
+      <motion.rect
+        x="150" y="224" height="28" rx="4"
+        fill="rgba(74,222,128,0.18)" stroke="rgba(74,222,128,0.5)"
+        initial={{ width: 0 }} animate={{ width: 36 }}
+        transition={{ duration: 0.6, delay: 2.4, ease }}
+      />
+      <motion.text
+        x="200" y="243" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="rgba(74,222,128,0.95)"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.9 }}
+      >
+        2–3s  ·  ~20× faster
+      </motion.text>
+    </g>
+  );
+}
+
+// 07 — Shared Redis connection pool (generic-pool + ioredis).
+// Workers acquire/release bounded connections instead of leaking per-op clients.
+function PoolViz() {
+  const workers = [80, 140, 200, 260];
+  const slots = [0, 1, 2, 3, 4];
+  return (
+    <g>
+      {/* worker fleet */}
+      <text x="34" y="44" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="rgba(255,255,255,0.45)">WORKER FLEET</text>
+      {workers.map((y, i) => (
+        <g key={i}>
+          {node(70, y, `W${i + 1}`, 0.1 + i * 0.08, 20)}
+          {drawPath(`M 92 ${y} Q 160 ${y} 224 160`, 0.5 + i * 0.08)}
+        </g>
+      ))}
+
+      {/* the pool */}
+      <motion.g initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.7, duration: 0.5 }} style={{ transformOrigin: '300px 160px' }}>
+        <rect x="224" y="96" width="152" height="128" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.3)" />
+        <text x="300" y="120" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="10" fill="rgba(255,255,255,0.85)">REDIS POOL</text>
+        <text x="300" y="136" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="8" fill="rgba(255,255,255,0.45)">generic-pool · ioredis</text>
+        {slots.map((s) => (
+          <motion.circle
+            key={s}
+            cx={252 + s * 24} cy="170" r="8"
+            fill="rgba(74,222,128,0.12)" stroke="rgba(74,222,128,0.5)"
+            animate={{ opacity: [0.35, 1, 0.35] }}
+            transition={{ duration: 2, repeat: Infinity, delay: s * 0.3 }}
+          />
+        ))}
+        <text x="300" y="208" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="rgba(255,255,255,0.55)">min 10 · max 500</text>
+      </motion.g>
+
+      {drawPath('M 376 160 L 470 160', 1)}
+
+      {/* redis */}
+      <motion.g initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.1, duration: 0.5 }}>
+        <rect x="470" y="128" width="96" height="64" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.3)" />
+        <text x="518" y="156" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="rgba(255,255,255,0.85)">REDIS</text>
+        <text x="518" y="173" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="8" fill="rgba(255,255,255,0.45)">bounded · no leaks</text>
+      </motion.g>
+
+      {/* acquire → release cycle */}
+      {workers.map((y, i) => (
+        <motion.circle
+          key={i}
+          r="3" fill="#4ade80"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 1, 1, 0], cx: [92, 224], cy: [y, 160] }}
+          transition={{ duration: 1.3, delay: 1.4 + i * 0.3, repeat: Infinity, repeatDelay: 1.4, ease: 'easeInOut' }}
+        />
+      ))}
+    </g>
+  );
+}
+
+// 08 — Deterministic pagination: stable sort with an _id tiebreaker on a
+// non-unique timestamp, plus idempotent upserts → no missing/duplicate rows.
+function PaginationViz() {
+  const before = [
+    { t: 'ts:10', tag: '', bad: false },
+    { t: 'ts:10', tag: 'dup', bad: true },
+    { t: 'ts:09', tag: '', bad: false },
+    { t: 'ts:09', tag: 'lost', bad: true },
+  ];
+  const after = [
+    { t: 'ts:10  _id:a2', bad: false },
+    { t: 'ts:10  _id:b7', bad: false },
+    { t: 'ts:09  _id:c1', bad: false },
+    { t: 'ts:09  _id:d4', bad: false },
+  ];
+  return (
+    <g>
+      {/* BEFORE: non-deterministic sort on a non-unique timestamp */}
+      <text x="40" y="44" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="rgba(255,255,255,0.45)">SORT: timestamp</text>
+      <text x="40" y="60" fontFamily="JetBrains Mono, monospace" fontSize="8" fill="rgba(239,68,68,0.7)">non-deterministic</text>
+      {before.map((r, i) => (
+        <motion.g
+          key={i}
+          initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 + i * 0.1, ease }}
+        >
+          <rect x="40" y={78 + i * 38} width="200" height="30" rx="4"
+            fill={r.bad ? 'rgba(239,68,68,0.06)' : 'rgba(255,255,255,0.03)'}
+            stroke={r.bad ? 'rgba(239,68,68,0.45)' : 'rgba(255,255,255,0.2)'} />
+          <text x="56" y={97 + i * 38} fontFamily="JetBrains Mono, monospace" fontSize="11" fill="rgba(255,255,255,0.8)">{r.t}</text>
+          {r.tag && (
+            <text x="224" y={97 + i * 38} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="rgba(239,68,68,0.9)">{r.tag}</text>
+          )}
+        </motion.g>
+      ))}
+
+      {/* arrow: add _id tiebreaker */}
+      {drawPath('M 250 160 L 332 160', 0.8)}
+      <motion.text
+        x="291" y="150" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="rgba(74,222,128,0.9)"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
+      >
+        + _id
+      </motion.text>
+
+      {/* AFTER: deterministic, stable, complete */}
+      <text x="346" y="44" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="rgba(255,255,255,0.45)">SORT: timestamp, _id</text>
+      <text x="346" y="60" fontFamily="JetBrains Mono, monospace" fontSize="8" fill="rgba(74,222,128,0.75)">deterministic · idempotent</text>
+      {after.map((r, i) => (
+        <motion.g
+          key={i}
+          initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, delay: 1.1 + i * 0.1, ease }}
+        >
+          <rect x="346" y={78 + i * 38} width="214" height="30" rx="4"
+            fill="rgba(74,222,128,0.05)" stroke="rgba(74,222,128,0.4)" />
+          <text x="362" y={97 + i * 38} fontFamily="JetBrains Mono, monospace" fontSize="11" fill="rgba(255,255,255,0.85)">{r.t}</text>
+        </motion.g>
+      ))}
     </g>
   );
 }

@@ -6,7 +6,7 @@ const stats = [
   { num: '40%', label: 'dev effort cut by internal tooling' },
   { num: '10M+', label: 'records migrated & processed' },
   { num: '2', label: 'AI auto-blocking agents shipped' },
-  { num: '99.9%', label: 'service uptime maintained' },
+  { num: '~20×', label: 'faster Sales Activity API (50s → 2–3s)' },
 ];
 
 const fade = (delay = 0) => ({
@@ -39,7 +39,11 @@ export default function About() {
             on LinkedIn</strong>. I work across both the Recotap and AdRadar products — AI-powered
             auto-blocking agents (company &amp; title), serverless orchestration with state machines
             and Lambda, the LinkedIn integration, ROI analytics, and the internal event-driven
-            notification system on Pub/Sub.
+            notification system on Pub/Sub. A lot of my recent work is <strong>performance,
+            scalability and reliability</strong> ownership — offloading high-volume CRM syncs to a
+            <strong> BullMQ + Redis</strong> queue to stop API crashes, taking a Sales Activity API
+            over ~7.5M records from <strong>50s+ (504 timeouts) down to 2–3s</strong>, and building a
+            shared Redis connection pool to keep the worker fleet stable under load.
           </p>
           <p>
             Before Recotap I was at <strong>Skills Outsource Think Pvt Ltd</strong>, a service

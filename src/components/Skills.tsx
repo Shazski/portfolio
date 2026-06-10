@@ -3,16 +3,20 @@ import { MouseEvent, useRef } from 'react';
 import SplitText from './SplitText';
 
 const groups = [
-  { title: 'Languages', items: ['TypeScript', 'JavaScript', 'SQL'] },
-  { title: 'Backend', items: ['Node.js', 'NestJS', 'Express.js', 'REST APIs', 'API Gateway', 'Microservices'] },
-  { title: 'Frontend', items: ['Angular', 'React', 'HTML / CSS', 'Bootstrap'] },
-  { title: 'Databases', items: ['MongoDB', 'Aggregation Pipeline', 'Indexing', 'Bulk Ops', 'Airtable'] },
-  { title: 'Messaging / Streaming', items: ['Kafka', 'RabbitMQ', 'GCP Pub/Sub'] },
-  { title: 'Cloud / Serverless', items: ['AWS Lambda', 'Step Functions', 'Vercel'] },
-  { title: 'DevOps', items: ['Docker', 'Kubernetes', 'CI/CD', 'Production Debugging'] },
-  { title: 'Architecture', items: ['Event-driven', 'State Machines', 'API Optimization', 'SSO / Auth'] },
-  { title: 'Problem Solving', items: ['Algorithmic Thinking', 'Performance Reasoning', 'System Debugging'] },
-  { title: 'Engineering Leadership', items: ['Code Review', 'Mentoring', 'Tech Specs', 'Architecture Reviews', 'Observability', 'Cross-team Collaboration'] },
+  { title: 'Languages', items: ['TypeScript', 'JavaScript', 'SQL', 'Python', 'Bash / Shell'] },
+  { title: 'Backend', items: ['Node.js', 'NestJS', 'Nx Monorepo', 'Express.js', 'REST APIs', 'GraphQL', 'WebSockets', 'API Gateway', 'Microservices', 'Webhooks'] },
+  { title: 'Frontend', items: ['Angular', 'React', 'Next.js', 'HTML / CSS', 'Tailwind CSS', 'Sass', 'Bootstrap', 'Vite', 'Webpack'] },
+  { title: 'Databases', items: ['MongoDB', 'Aggregation Pipeline', 'Indexing', 'Query Optimization', 'Bulk Ops', 'Schema Design', 'Transactions', 'Migrations', 'Airtable', 'PostgreSQL', 'Redis'] },
+  { title: 'Messaging / Queues', items: ['BullMQ', 'ioredis', 'Async Job Queues', 'Kafka', 'RabbitMQ', 'GCP Pub/Sub', 'Event Bus'] },
+  { title: 'Cloud / Serverless', items: ['AWS Lambda', 'Step Functions', 'S3', 'CloudWatch', 'IAM', 'GCP', 'Vercel', 'CDN'] },
+  { title: 'DevOps', items: ['Docker', 'Kubernetes', 'CI/CD', 'GitHub Actions', 'Linux', 'Production Debugging', 'Logging & Monitoring'] },
+  { title: 'Architecture', items: ['Event-driven', 'State Machines', 'API Optimization', 'Performance Tuning', 'Connection Pooling', 'Caching', 'Backpressure', 'Idempotency', 'Rate Limiting', 'SSO / Auth'] },
+  { title: 'Testing & QA', items: ['Unit Testing', 'Integration Testing', 'Jest', 'Postman', 'Manual QA', 'TDD'] },
+  { title: 'Security', items: ['OAuth 2.0', 'JWT', 'Secure Cookies', 'CSRF Protection', 'OWASP Awareness', 'HTTPS / TLS'] },
+  { title: 'AI / LLM', items: ['LLM Integration', 'Prompt Engineering', 'OpenAI / Anthropic APIs', 'Embeddings', 'Vector Search', 'RAG'] },
+  { title: 'Tools & Process', items: ['Agile', 'Scrum', 'Kanban', 'Jira', 'Confluence', 'Notion', 'Linear', 'Git', 'GitHub'] },
+  { title: 'Problem Solving', items: ['Algorithmic Thinking', 'Performance Reasoning', 'System Debugging', 'Root-cause Analysis'] },
+  { title: 'Engineering Leadership', items: ['Code Review', 'Mentoring', 'Tech Specs', 'Architecture Reviews', 'Observability', 'Cross-team Collaboration', 'Estimation'] },
 ];
 
 function SkillCard({ g, i }: { g: typeof groups[number]; i: number }) {

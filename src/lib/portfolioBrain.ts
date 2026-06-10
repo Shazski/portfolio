@@ -39,9 +39,9 @@ const INTENTS: Intent[] = [
     id: 'recotap',
     patterns: ['recotap', 'current company', 'current job', 'where does he work', 'where works now', 'adradar', 'ad radar'],
     responses: [
-      "At Recotap (a product company building ABM marketing on LinkedIn — Recotap and AdRadar), Sharoon has: built two AI auto-blocking agents for company and title classification, designed AWS Step Functions + Lambda workflows replacing fragile cron pipelines, owned a GCP Pub/Sub notification system, and built the LinkedIn integration end-to-end with ROI analytics. He also operates production services at 99.9% uptime.",
+      "At Recotap (a product company building ABM marketing on LinkedIn — Recotap and AdRadar), Sharoon has: built two AI auto-blocking agents for company and title classification, designed AWS Step Functions + Lambda workflows replacing fragile cron pipelines, owned a GCP Pub/Sub notification system, and built the LinkedIn integration end-to-end with ROI analytics. A lot of his recent work is performance, scalability and reliability ownership — eliminating API crashes from high-volume CRM syncs (~2,000 req/sec) by offloading to a BullMQ + Redis queue, taking a Sales Activity API over ~7.5M records from 50s+ (504 timeouts) down to 2–3s, building a shared Redis connection pool, and fixing a subtle pagination data-integrity bug.",
     ],
-    suggestions: ['Tell me about the AI agents', 'What about the Step Functions work?', 'Pub/Sub system?'],
+    suggestions: ['Tell me about the BullMQ work', 'How did he fix the 50s API?', 'The Redis connection pool?'],
   },
   {
     id: 'previous-job',
@@ -56,9 +56,9 @@ const INTENTS: Intent[] = [
     id: 'projects',
     patterns: ['projects', 'what has he built', 'what has he shipped', 'his work', 'portfolio of work', 'case studies', 'what he made'],
     responses: [
-      "Sharoon's selected projects: (1) AI auto-blocking agents at Recotap/AdRadar, (2) State Machine & Lambda Orchestration, (3) GCP Pub/Sub notification system, (4) LinkedIn integration & ROI analytics, (5) Airtable→MongoDB migration at Haiku, (6) MongoDB query-builder plugin, (7) Cross-domain SSO. Click any project on the page to see the full case study.",
+      "Sharoon's selected projects: (1) AI auto-blocking agents at Recotap/AdRadar, (2) State Machine & Lambda Orchestration, (3) GCP Pub/Sub notification system, (4) LinkedIn integration & ROI analytics, (5) Offloading high-volume CRM syncs to a BullMQ queue, (6) Cutting a 50s+ Sales Activity API to 2–3s, (7) Shared Redis connection pool, (8) Pagination data-integrity fix, (9) Airtable→MongoDB migration at Haiku, (10) MongoDB query-builder plugin, (11) Cross-domain SSO. Click any project on the page to see the full case study.",
     ],
-    suggestions: ['Tell me about the AI agents', 'The ROI analytics?', 'The migration project?'],
+    suggestions: ['The BullMQ queue work?', 'How did he fix the 50s API?', 'The Redis connection pool?'],
   },
   {
     id: 'ai-agents',
@@ -89,6 +89,38 @@ const INTENTS: Intent[] = [
     ],
   },
   {
+    id: 'bullmq-queue',
+    patterns: ['bullmq', 'bull mq', 'job queue', 'queue', 'async job', 'crm sync', 'api crash', 'offload', 'backpressure', 'background job', '202', 'ingestion'],
+    responses: [
+      "A synchronous CRM sales-activity ingestion endpoint was crashing Recotap's API. Third-party syncs hit it at ~2,000 req/sec, each request carrying ~500 records, and every request held a DB connection for the full write — exhausting the tenant connection pool and spiking MongoDB CPU. Sharoon re-architected it to enqueue a job and return HTTP 202 in milliseconds, with a dedicated BullMQ + Redis queue (bounded concurrency of 3, exponential backoff, 3 retries). Now the API responds instantly and database load stays flat regardless of inbound spikes.",
+    ],
+    suggestions: ['How did he fix the 50s API?', 'The Redis connection pool?'],
+  },
+  {
+    id: 'slow-api',
+    patterns: ['sales activity', 'slow api', '50s', '504', 'gateway timeout', 'timeout', 'pagination', 'search filter', 'list api', 'latency', 'regex', 'count', '7.5m', 'cpu', 'mongodb cpu', 'slow query', 'index'],
+    responses: [
+      "The Sales Activity list API — search, pagination and a total-count over ~7.5M records — took 50+ seconds and routinely threw 504 Gateway Timeouts on large tenants. The culprit was an unindexed $regex doing >20s full-collection scans, plus an expensive count on every request. Sharoon replaced the $regex with index-backed $in lookups resolved from a cached in-memory domain index (stale-while-revalidate), redesigned compound indexes with query hints and maxTimeMS safeguards, and parallelized the count/data queries with short-TTL count caching. Result: 50s+ → 2–3s (~20× faster), zero 504s, and a sharp drop in MongoDB CPU.",
+    ],
+    suggestions: ['The BullMQ queue work?', 'The pagination bug?'],
+  },
+  {
+    id: 'redis-pool',
+    patterns: ['redis', 'connection pool', 'connection pooling', 'ioredis', 'generic-pool', 'connection leak', 'exhaustion', 'resource management'],
+    responses: [
+      "Across Recotap's worker fleet, Redis clients were being created per operation with no shared lifecycle — leaking connections and risking exhaustion under load. Sharoon built a managed Redis connection pool on generic-pool + ioredis with bounded sizing (min 10 / max 500), acquire timeouts, idle eviction, and a per-environment dedicated-instance option, then replaced the ad-hoc clients fleet-wide. Connections are now bounded and leak-free, removing a recurring instability as tenant volume grows.",
+    ],
+    suggestions: ['The BullMQ queue work?', 'How did he fix the 50s API?'],
+  },
+  {
+    id: 'data-integrity',
+    patterns: ['data integrity', 'data accuracy', 'last data', 'latest record', 'duplicate', 'missing record', 'reporting bug', 'data bug', 'idempotent', 'tiebreaker'],
+    responses: [
+      "Sharoon tracked down a bug where the most recent sales activities intermittently disappeared or duplicated across paginated results. The root cause was a non-deterministic sort on a non-unique timestamp. He added a deterministic _id tiebreaker to the sort (with supporting indexes) and made CRM ingestion idempotent via externalActivityId-keyed upserts — guaranteeing stable, complete, gap-free pagination and clean re-syncs.",
+    ],
+    suggestions: ['How did he fix the 50s API?', 'The BullMQ queue work?'],
+  },
+  {
     id: 'migration',
     patterns: ['migration', 'airtable', 'etl', 'data migration', 'mongo migration'],
     responses: [
@@ -114,7 +146,7 @@ const INTENTS: Intent[] = [
     id: 'skills',
     patterns: ['skills', 'stack', 'tech stack', 'technologies', 'what does he use', 'languages', 'frameworks'],
     responses: [
-      "Languages: TypeScript, JavaScript, SQL. Backend: Node.js, NestJS, Express.js, REST APIs, API Gateway, Microservices. Frontend: Angular, React, HTML/CSS. Databases: MongoDB (deep — aggregation pipeline, indexing, bulk ops), Airtable. Messaging: Kafka, RabbitMQ, GCP Pub/Sub. Cloud: AWS Lambda, Step Functions, Vercel. DevOps: Docker, Kubernetes, CI/CD. Architecture: event-driven design, state machines, API optimization, SSO/auth.",
+      "Languages: TypeScript, JavaScript, SQL. Backend: Node.js, NestJS, Express.js, REST APIs, API Gateway, Microservices. Frontend: Angular, React, HTML/CSS. Databases: MongoDB (deep — aggregation pipeline, indexing, bulk ops, query/CPU optimization), Redis, Airtable. Messaging / Queues: BullMQ, Kafka, RabbitMQ, GCP Pub/Sub. Cloud: AWS Lambda, Step Functions, Vercel. DevOps: Docker, Kubernetes, CI/CD. Architecture: event-driven design, state machines, performance & reliability tuning, SSO/auth.",
     ],
     suggestions: ['Backend stack?', 'Database experience?', 'Cloud / DevOps?'],
   },
@@ -129,7 +161,7 @@ const INTENTS: Intent[] = [
     id: 'database',
     patterns: ['database', 'mongodb', 'mongo', 'aggregation', 'indexing', 'query', 'sql'],
     responses: [
-      "He's gone deep on MongoDB — aggregation pipelines, index intersection, the query planner, execution stats, bulk operations. Has tuned production aggregations to keep dashboard P95 < 200ms and built an internal query-builder plugin used across the team.",
+      "He's gone deep on MongoDB — aggregation pipelines, index intersection, the query planner, execution stats, bulk operations. He took a Sales Activity API over ~7.5M records from 50s+ (504 timeouts) to 2–3s by replacing full-collection-scan $regex with index-backed cached lookups and parallelized counts, kept dashboard P95 < 200ms, and built an internal query-builder plugin used across the team.",
     ],
   },
   {
@@ -202,7 +234,7 @@ const INTENTS: Intent[] = [
     id: 'metrics',
     patterns: ['impact', 'metrics', 'numbers', 'stats', 'achievements', 'results'],
     responses: [
-      "Some numbers from his work: 40% reduction in team query-writing effort via the MongoDB query-builder plugin, 10M+ records migrated/processed in the Airtable→MongoDB migration, 2 AI auto-blocking agents shipped to production, 99.9% service uptime maintained, and ROI dashboard P95 kept under 200ms.",
+      "Some numbers from his work: took a Sales Activity API over ~7.5M records from 50s+ (504 timeouts) down to 2–3s (~20× faster), eliminated API crashes under ~2,000 req/sec CRM sync load by offloading to a BullMQ queue (HTTP 202 in milliseconds), built a Redis connection pool bounded at 10–500 connections, 40% less team query-writing effort via the MongoDB query-builder plugin, 10M+ records migrated/processed, 2 AI auto-blocking agents shipped, and ROI dashboard P95 kept under 200ms.",
     ],
   },
 
@@ -275,11 +307,11 @@ const ROLE_CATS: Record<string, RoleCat> = {
     keywords: ['backend', 'platform', 'systems', 'api', 'microservices', 'server', 'distributed', 'scalable'],
     lead: 'Backend',
     projects: [
-      'AWS Step Functions + Lambda workflow orchestration replacing fragile cron pipelines',
-      'GCP Pub/Sub event-driven notification system with idempotent handlers and dead-letter routing',
-      'LinkedIn integration with MongoDB aggregations tuned for sub-200ms dashboard P95',
+      'eliminating API crashes from high-volume CRM syncs (~2,000 req/sec) by offloading ingestion to a BullMQ + Redis queue with bounded concurrency, backoff and retries',
+      'taking a Sales Activity API over ~7.5M records from 50s+ (504 timeouts) to 2–3s via index-backed cached queries, plus a shared Redis connection pool to prevent exhaustion',
+      'AWS Step Functions + Lambda orchestration and a GCP Pub/Sub event-driven notification system',
     ],
-    stack: ['Node.js', 'NestJS', 'MongoDB', 'AWS Lambda', 'GCP Pub/Sub', 'TypeScript'],
+    stack: ['Node.js', 'NestJS', 'MongoDB', 'Redis', 'BullMQ', 'AWS Lambda', 'GCP Pub/Sub', 'TypeScript'],
   },
   cloud: {
     label: 'Cloud / DevOps',
@@ -297,11 +329,11 @@ const ROLE_CATS: Record<string, RoleCat> = {
     keywords: ['data', 'database', 'etl', 'analytics', 'mongo', 'sql', 'pipeline', 'data engineer', 'warehouse'],
     lead: 'Data Engineering',
     projects: [
+      'MongoDB query/index/caching redesign that took a 50s+ list API over ~7.5M records (with search, pagination and counts) down to 2–3s and eliminated 504 timeouts',
       'production Airtable to MongoDB migration with 100% data parity (batched ETL, dual-write cutover, validation)',
       'internal MongoDB query-builder plugin used across the team — reduced query-writing effort by ~40%',
-      'aggregation pipelines and indexes tuned for live dashboards (sub-200ms P95)',
     ],
-    stack: ['MongoDB', 'Aggregation Pipeline', 'ETL', 'TypeScript', 'Indexing'],
+    stack: ['MongoDB', 'Aggregation Pipeline', 'Indexing', 'ETL', 'Redis', 'TypeScript'],
   },
   fullstack: {
     label: 'Full Stack',
@@ -372,6 +404,8 @@ const ALL_SKILLS: SkillEntry[] = [
   { keys: ['mongodb', 'mongo'], canonical: 'MongoDB' },
   { keys: ['aggregation'], canonical: 'Aggregation Pipeline' },
   { keys: ['indexing'], canonical: 'Indexing' },
+  { keys: ['redis'], canonical: 'Redis' },
+  { keys: ['bullmq', 'bull mq'], canonical: 'BullMQ' },
   { keys: ['kafka'], canonical: 'Kafka' },
   { keys: ['rabbitmq'], canonical: 'RabbitMQ' },
   { keys: ['pub/sub', 'pubsub'], canonical: 'Pub/Sub' },
@@ -393,7 +427,7 @@ const ALL_SKILLS: SkillEntry[] = [
   { keys: ['agile', 'scrum'], canonical: 'Agile' },
 ];
 
-const COMMON_OTHER_TECH = ['rust', 'go', 'golang', 'python', 'java', 'kotlin', 'swift', 'redis', 'postgres', 'postgresql', 'mysql', 'azure', 'graphql', 'elasticsearch', 'spark', 'hadoop', 'snowflake'];
+const COMMON_OTHER_TECH = ['rust', 'go', 'golang', 'python', 'java', 'kotlin', 'swift', 'postgres', 'postgresql', 'mysql', 'azure', 'graphql', 'elasticsearch', 'spark', 'hadoop', 'snowflake'];
 
 export type JobMatch = {
   score: number;
