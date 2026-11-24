@@ -1,11 +1,13 @@
 import { motion } from 'framer-motion';
 import MagneticButton from './MagneticButton';
 import SplitText from './SplitText';
+import Scene3D from './Scene3D';
 
 export default function Contact() {
   return (
     <section id="contact" className="contact">
       <motion.div
+        className="contact-card"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
@@ -23,6 +25,7 @@ export default function Contact() {
           sharoonkp267@gmail.com <span className="arrow">→</span>
         </MagneticButton>
 
+        <Scene3D variant="blob" className="contact-scene" />
         <div className="contact-links">
           <a href="https://github.com/" target="_blank" rel="noreferrer" className="link-underline">github <span>↗</span></a>
           <a href="https://linkedin.com/" target="_blank" rel="noreferrer" className="link-underline">linkedin <span>↗</span></a>

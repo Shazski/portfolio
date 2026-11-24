@@ -828,10 +828,11 @@ function CameraRig() {
   return null;
 }
 
-export default function HeroScene() {
+export default function HeroScene({ active = true }: { active?: boolean }) {
   return (
     <Canvas
-      dpr={[1, 1.5]}
+      frameloop={active ? "always" : "never"}
+      dpr={[1, 1.25]}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       camera={{ position: [0, 0.05, 4.3], fov: 42 }}
     >

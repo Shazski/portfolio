@@ -5,30 +5,26 @@ import Skills from './components/Skills';
 import Projects from './components/Projects';
 import Experience from './components/Experience';
 import Contact from './components/Contact';
-import ThreeBackground from './components/ThreeBackground';
-import CustomCursor from './components/CustomCursor';
+import SafeCanvas from './components/SafeCanvas';
 import ScrollProgress from './components/ScrollProgress';
 import Marquee from './components/Marquee';
 import Loader from './components/Loader';
-import MouseAura from './components/MouseAura';
 import AuroraBackground from './components/AuroraBackground';
 import SmoothScroll from './components/SmoothScroll';
 import PortfolioChat from './components/PortfolioChat';
 import AISection from './components/AISection';
 import CommandPalette from './components/CommandPalette';
 import AccentSwitcher from './components/AccentSwitcher';
+import Spotlight from './components/Spotlight';
 
 export default function App() {
   return (
     <div className="app">
       <Loader />
+      <Spotlight />
+      <div className="grain" aria-hidden />
       <SmoothScroll />
       <AuroraBackground />
-      <div className="three-bg">
-        <ThreeBackground />
-      </div>
-      <MouseAura />
-      <CustomCursor />
       <ScrollProgress />
       <div className="content">
         <Navbar />

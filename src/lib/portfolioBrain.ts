@@ -22,7 +22,7 @@ const INTENTS: Intent[] = [
     id: 'who',
     patterns: ['who is sharoon', 'who are you', 'about sharoon', 'introduce', 'tell me about him', 'about him', 'who is he'],
     responses: [
-      "Sharoon is a Software Engineer with a strong backend lean. He builds production systems end-to-end on Node.js, NestJS, MongoDB, and AWS/GCP, with Angular and React on the frontend when needed. He's currently at Recotap (Recotap & AdRadar products) and earlier worked at Skills Outsource Think Pvt Ltd on a product called Haiku.",
+      "Sharoon is a Software Engineer with a strong focus on the MERN stack (MongoDB, Express, React, Node.js) and real-time backend systems. He builds production systems end-to-end on Node.js, NestJS, MongoDB, and AWS/GCP, with React on the frontend and WebSockets for real-time streaming. He's currently at Recotap (Recotap & AdRadar products) and earlier worked at Skills Outsource Think Pvt Ltd on a product called Haiku.",
     ],
     suggestions: ['What does he build at Recotap?', 'What projects has he shipped?', 'What is his stack?'],
   },
@@ -30,7 +30,7 @@ const INTENTS: Intent[] = [
     id: 'role',
     patterns: ['what does sharoon do', 'what does he do', 'his role', 'his job', 'job title', 'position'],
     responses: [
-      "Sharoon is a Software Engineer focused on backend systems — APIs, data pipelines, serverless orchestration, event-driven services, and cloud infrastructure. He also ships frontend features in Angular and React when a feature needs full-stack reach.",
+      "Sharoon is a Software Engineer focused on backend systems — APIs, data pipelines, serverless orchestration, event-driven services, and cloud infrastructure. He also builds real-time interfaces and frontend features in React and WebSockets.",
     ],
     suggestions: ['What is he working on now?', 'What projects has he shipped?'],
   },
@@ -85,7 +85,7 @@ const INTENTS: Intent[] = [
     id: 'linkedin-roi',
     patterns: ['linkedin', 'roi', 'analytics', 'dashboard', 'aggregation', 'p95'],
     responses: [
-      "He owns the LinkedIn Marketing API integration end-to-end — rate-aware sync, data normalization, and resume-from-interrupt logic. He then built the ROI analytics with MongoDB aggregation pipelines and indexes tuned for the dashboard's access pattern, keeping P95 under 200ms. The frontend ROI graph is in Angular with filtering and date-range navigation.",
+      "He owns the LinkedIn Marketing API integration end-to-end — rate-aware sync, data normalization, and resume-from-interrupt logic. He then built the ROI analytics with MongoDB aggregation pipelines and indexes tuned for the dashboard's access pattern, keeping P95 under 200ms. The frontend ROI graph is built in React with WebSockets for real-time live updates, filtering, and date-range navigation.",
     ],
   },
   {
@@ -146,7 +146,7 @@ const INTENTS: Intent[] = [
     id: 'skills',
     patterns: ['skills', 'stack', 'tech stack', 'technologies', 'what does he use', 'languages', 'frameworks'],
     responses: [
-      "Languages: TypeScript, JavaScript, SQL. Backend: Node.js, NestJS, Express.js, REST APIs, API Gateway, Microservices. Frontend: Angular, React, HTML/CSS. Databases: MongoDB (deep — aggregation pipeline, indexing, bulk ops, query/CPU optimization), Redis, Airtable. Messaging / Queues: BullMQ, Kafka, RabbitMQ, GCP Pub/Sub. Cloud: AWS Lambda, Step Functions, Vercel. DevOps: Docker, Kubernetes, CI/CD. Architecture: event-driven design, state machines, performance & reliability tuning, SSO/auth.",
+      "Languages: TypeScript, JavaScript, SQL. Backend: Node.js, Express.js, NestJS, REST APIs, WebSockets (Socket.io), API Gateway, Microservices. Frontend: React, Next.js, HTML/CSS. Databases: MongoDB (deep — MERN stack, aggregation pipeline, indexing, bulk ops, query/CPU optimization), Redis, Airtable. Messaging / Queues / Real-Time: WebSockets, BullMQ, Kafka, RabbitMQ, GCP Pub/Sub. Cloud: AWS Lambda, Step Functions, Vercel. DevOps: Docker, Kubernetes, CI/CD. Architecture: MERN stack development, real-time WebSockets, event-driven design, state machines, performance & reliability tuning, SSO/auth.",
     ],
     suggestions: ['Backend stack?', 'Database experience?', 'Cloud / DevOps?'],
   },
@@ -166,9 +166,9 @@ const INTENTS: Intent[] = [
   },
   {
     id: 'frontend',
-    patterns: ['frontend', 'react', 'angular', 'ui', 'html', 'css'],
+    patterns: ['frontend', 'react', 'next.js', 'nextjs', 'ui', 'html', 'css'],
     responses: [
-      "Full-stack reach when needed — Angular at Recotap for the analytics and integration surfaces, React earlier at Haiku for customer-facing and internal products. The portfolio you're looking at right now is built in React + Three.js + Framer Motion.",
+      "Full-stack reach when needed — React and WebSockets at Recotap for the analytics and integration surfaces, React earlier at Haiku for customer-facing and internal products. The portfolio you're looking at right now is built in React + Three.js + Framer Motion.",
     ],
   },
   {
@@ -340,22 +340,22 @@ const ROLE_CATS: Record<string, RoleCat> = {
     keywords: ['fullstack', 'full stack', 'full-stack', 'product', 'startup', 'product engineer'],
     lead: 'Full Stack',
     projects: [
-      'Recotap ABM platform end-to-end — backend APIs and Angular ROI analytics surfaces',
+      'Recotap ABM platform end-to-end — backend APIs and React/WebSocket ROI analytics surfaces',
       'Haiku ad-ops product — React frontend + Node.js APIs',
       'Cross-domain SSO across multiple product domains, eliminating forced re-logins',
     ],
-    stack: ['Node.js', 'NestJS', 'Angular', 'React', 'MongoDB', 'AWS', 'GCP'],
+    stack: ['Node.js', 'NestJS', 'React', 'MongoDB', 'AWS', 'GCP', 'WebSockets'],
   },
   frontend: {
     label: 'Frontend',
-    keywords: ['frontend', 'front end', 'react', 'angular', 'ui', 'ux engineer', 'web'],
+    keywords: ['frontend', 'front end', 'react', 'nextjs', 'ui', 'ux engineer', 'web'],
     lead: 'Frontend (with deep backend reach)',
     projects: [
-      'Angular ROI analytics dashboard with filtering, drill-down, and date-range navigation',
+      'React ROI analytics dashboard powered by WebSockets, featuring filtering, drill-down, and live updates',
       'React features across customer-facing and internal products at Haiku',
       'This portfolio: React + Three.js + Framer Motion + Lenis',
     ],
-    stack: ['React', 'Angular', 'TypeScript', 'Framer Motion', 'Three.js'],
+    stack: ['React', 'TypeScript', 'Framer Motion', 'Three.js', 'Tailwind CSS'],
   },
   senior: {
     label: 'Senior / Staff',
@@ -400,7 +400,7 @@ const ALL_SKILLS: SkillEntry[] = [
   { keys: ['microservice'], canonical: 'Microservices' },
   { keys: ['api gateway'], canonical: 'API Gateway' },
   { keys: ['react'], canonical: 'React' },
-  { keys: ['angular'], canonical: 'Angular' },
+  { keys: ['websockets', 'socket.io', 'websocket'], canonical: 'WebSockets' },
   { keys: ['mongodb', 'mongo'], canonical: 'MongoDB' },
   { keys: ['aggregation'], canonical: 'Aggregation Pipeline' },
   { keys: ['indexing'], canonical: 'Indexing' },

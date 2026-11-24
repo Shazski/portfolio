@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
 import SplitText from './SplitText';
+import Scene3D from './Scene3D';
 
 const items = [
   {
-    when: 'Present',
+    when: '2025 - Current',
     role: 'Full Stack Engineer',
     company: 'Recotap',
     context: 'Product · ABM marketing on LinkedIn — Recotap & AdRadar',
@@ -16,11 +17,11 @@ const items = [
       'Cut a Sales Activity list API over ~7.5M records from 50s+ (504 timeouts) to 2–3s via index-backed queries, cached domain lookups, and parallelized counts — slashing MongoDB CPU.',
       'Built a shared Redis connection pool (generic-pool + ioredis, min 10 / max 500) to prevent connection leaks and exhaustion across the worker fleet.',
       'Fixed a data-integrity bug where the latest records dropped/duplicated across pages — added an _id sort tiebreaker and idempotent externalActivityId upserts.',
-      'Frontend work in Angular for product surfaces tied to the analytics and integration features I shipped.',
+      'Frontend work in React for product surfaces, integrating WebSockets to stream LinkedIn campaign events and ROI metrics in real time.',
     ],
   },
   {
-    when: 'Earlier',
+    when: '2024 - 2025',
     role: 'Full Stack Engineer',
     company: 'Skills Outsource Think Pvt Ltd',
     context: 'Service · Ad operations outsourced to French advertisers across Meta, TikTok & other social platforms',
@@ -46,6 +47,7 @@ const items = [
 export default function Experience() {
   return (
     <section id="experience">
+      <div className="section-head">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -55,6 +57,8 @@ export default function Experience() {
         <div className="section-eyebrow"><span className="eyebrow-line" /> 04 / experience</div>
         <SplitText as="h2" className="section-title">Where I've spent my engineering hours.</SplitText>
       </motion.div>
+        <Scene3D variant="servers" className="section-scene" />
+      </div>
 
       <div className="exp">
         {items.map((it, i) => (
@@ -78,8 +82,8 @@ export default function Experience() {
                   key={b}
                   initial={{ opacity: 0, x: 12 }}
                   whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, amount: 0.4 }}
-                  transition={{ duration: 0.45, delay: 0.1 + bi * 0.05 }}
+                  viewport={{ once: true, amount: 0 }}
+                  transition={{ duration: 0.35, delay: Math.min(bi * 0.03, 0.2) }}
                 >
                   {b}
                 </motion.li>

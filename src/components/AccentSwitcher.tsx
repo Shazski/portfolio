@@ -8,6 +8,7 @@ type Accent = {
 };
 
 const ACCENTS: Accent[] = [
+  { id: 'ember', label: 'Ember', swatch: '#ff7a45' },
   { id: 'lavender', label: 'Lavender', swatch: '#a78bfa' },
   { id: 'periwinkle', label: 'Periwinkle', swatch: '#7c9eff' },
   { id: 'amber', label: 'Amber', swatch: '#e9b872' },
@@ -16,7 +17,7 @@ const ACCENTS: Accent[] = [
   { id: 'teal', label: 'Teal', swatch: '#7fffdf' },
 ];
 
-const DEFAULT = 'lavender';
+const DEFAULT = 'ember';
 
 function readSaved(): string {
   try {

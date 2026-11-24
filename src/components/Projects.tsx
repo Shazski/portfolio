@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { MouseEvent, useRef, useState } from 'react';
 import ProjectModal, { ProjectDetail } from './ProjectModal';
 import SplitText from './SplitText';
+import Scene3D from './Scene3D';
 
 const projects: ProjectDetail[] = [
   {
@@ -250,6 +251,7 @@ export default function Projects() {
 
   return (
     <section id="projects">
+      <div className="section-head">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -261,6 +263,8 @@ export default function Projects() {
           Things I've built &amp; problems I've solved.
         </SplitText>
       </motion.div>
+        <Scene3D variant="cubes" className="section-scene" />
+      </div>
 
       <div className="projects">
         {projects.map((p, i) => (

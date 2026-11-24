@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import ThemeToggle from './ThemeToggle';
 
 const sections = ['about', 'skills', 'ai', 'projects', 'experience', 'contact'];
 
@@ -46,9 +47,12 @@ export default function Navbar() {
           </a>
         ))}
       </div>
-      <div className="nav-cta">
+      <div className="nav-right">
+        <ThemeToggle />
+        <div className="nav-cta">
         <span className="dot" />
         <span>available</span>
+      </div>
       </div>
     </nav>
   );

@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { MouseEvent, useRef } from 'react';
 import SplitText from './SplitText';
+import Scene3D from './Scene3D';
 
 const groups = [
   { title: 'Languages', items: ['TypeScript', 'JavaScript', 'SQL', 'Python', 'Bash / Shell'] },
@@ -58,6 +59,7 @@ function SkillCard({ g, i }: { g: typeof groups[number]; i: number }) {
 export default function Skills() {
   return (
     <section id="skills">
+      <div className="section-head">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -69,6 +71,8 @@ export default function Skills() {
           The toolkit I reach for. Backend & infrastructure first, with full-stack reach.
         </SplitText>
       </motion.div>
+        <Scene3D variant="orbit" className="section-scene" />
+      </div>
 
       <div className="skills-grid">
         {groups.map((g, i) => (

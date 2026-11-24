@@ -1,0 +1,420 @@
+/* =====================================================================
+   Modern layer — loads after bento.css.
+   Ember accent, light/dark themes, spotlight borders, tilt, grain,
+   animated gradient borders, shimmer type, scroll-driven reveals.
+   ===================================================================== */
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* ---------- Ember accent (new default) ---------- */
+:root[data-accent='ember'] {
+  --accent: #ff7a45;
+  --accent-strong: #ffa477;
+  --accent-rgb: 255, 122, 69;
+  --accent2-rgb: 255, 196, 120;
+}
+
+/* ---------- Themes ---------- */
+:root[data-theme='dark'] {
+  --bg: #0b0a09;
+  --tile: #141211;
+  --tile-hover: #191716;
+  --border: rgba(255, 245, 235, 0.07);
+  --border-strong: rgba(255, 245, 235, 0.16);
+  --text: #f7f3ee;
+  --text-mid: #cfc8c0;
+  --text-dim: #8f877f;
+  --dot: rgba(255, 245, 235, 0.07);
+  --glass: rgba(20, 18, 17, 0.7);
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --bg: #f6f3ee;
+  --tile: #ffffff;
+  --tile-hover: #fffdfa;
+  --border: rgba(30, 20, 10, 0.08);
+  --border-strong: rgba(30, 20, 10, 0.18);
+  --text: #1b1714;
+  --text-mid: #4a423b;
+  --text-dim: #7d746b;
+  --dot: rgba(30, 20, 10, 0.09);
+  --glass: rgba(255, 255, 255, 0.75);
+  color-scheme: light;
+}
+:root[data-theme='light'] .three-bg { opacity: 0.08; }
+:root[data-theme='light'] .aurora-blob { opacity: 0.18 !important; mix-blend-mode: multiply; }
+:root[data-theme='light'] .tile,
+:root[data-theme='light'] .skill-card,
+:root[data-theme='light'] .project,
+:root[data-theme='light'] .exp-row,
+:root[data-theme='light'] .stat,
+:root[data-theme='light'] .about-text,
+:root[data-theme='light'] .ai-card {
+  box-shadow: 0 1px 2px rgba(30, 20, 10, 0.04), 0 8px 24px -12px rgba(30, 20, 10, 0.12);
+}
+:root[data-theme='light'] .skill-chip,
+:root[data-theme='light'] .btn { background: rgba(30, 20, 10, 0.03); }
+:root[data-theme='light'] .nav-links a.is-active { background: rgba(30, 20, 10, 0.07); }
+:root[data-theme='light'] .grain { opacity: 0.025; }
+:root[data-theme='light'] ::selection { background: rgba(var(--accent-rgb), 0.25); }
+
+html, body { background: var(--bg); color: var(--text); transition: background 0.4s ease, color 0.4s ease; }
+.aurora { background: var(--bg); }
+.aurora::after { background-image: radial-gradient(var(--dot) 1px, transparent 1px); }
+.navbar, .navbar.is-scrolled { background: var(--glass); }
+.nav-logo, .nav-links a.is-active, .hero-name, .section-title, h3 { color: var(--text); }
+.nav-links a { color: var(--text-dim); }
+
+/* Native cursor — custom cursor feels laggy next to native scrolling */
+html, body, a, button, .magnetic, .project { cursor: auto; }
+a, button, .project, [role='button'] { cursor: pointer; }
+.cursor, .cursor-ring, .mouse-aura { display: none !important; }
+
+/* View-transition circle reveal for theme switch */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-new(root) { animation: theme-reveal 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes theme-reveal {
+  from { clip-path: circle(0% at 100% 0%); }
+  to   { clip-path: circle(150% at 100% 0%); }
+}
+
+/* ---------- Navbar right cluster ---------- */
+.nav-right { display: flex; align-items: center; gap: 0.5rem; }
+.theme-toggle {
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--tile);
+  color: var(--text);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s;
+}
+.theme-toggle:hover { transform: rotate(25deg) scale(1.06); border-color: var(--border-strong); }
+.theme-icon { font-size: 0.95rem; line-height: 1; }
+
+/* ---------- Film grain ---------- */
+.grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 1.2s steps(6) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -3%); }
+  60% { transform: translate(-2%, -1%); }
+  80% { transform: translate(3%, 3%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ---------- Spotlight border (follows the pointer) ---------- */
+.tile, .skill-card, .project, .exp-row, .stat, .about-text, .ai-card { position: relative; }
+.tile::after, .skill-card::after, .project::after, .exp-row::after,
+.stat::after, .about-text::after, .ai-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(var(--accent-rgb), 0.9), rgba(var(--accent-rgb), 0) 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.tile:hover::after, .skill-card:hover::after, .project:hover::after, .exp-row:hover::after,
+.stat:hover::after, .about-text:hover::after, .ai-card:hover::after { opacity: 1; }
+
+.about-text, .stat { overflow: hidden; }
+.stat::before, .about-text::before {
+  content: '';
+  display: block !important;
+  position: absolute;
+  inset: 0;
+  width: auto !important;
+  pointer-events: none;
+  background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 0%), rgba(var(--accent-rgb), 0.08), transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.stat:hover::before, .about-text:hover::before { opacity: 1; }
+
+/* ---------- 3D tilt (projects + CTA) ---------- */
+.projects { perspective: 1400px; }
+.project, .project:hover, .tile-cta {
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(0);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s, background 0.3s;
+  will-change: transform;
+}
+.project:hover { transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-4px); }
+
+/* ---------- Animated conic border on CTA + primary buttons ---------- */
+.tile-cta::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  opacity: 1 !important;
+  background: conic-gradient(from var(--angle), transparent 0 70%, rgba(var(--accent-rgb), 1) 85%, rgba(var(--accent2-rgb), 1) 92%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: spin-angle 4s linear infinite;
+}
+@keyframes spin-angle { to { --angle: 360deg; } }
+
+.btn-primary {
+  position: relative;
+  background: var(--text);
+  color: var(--bg);
+  border-color: transparent;
+  box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0);
+  transition: box-shadow 0.4s ease, transform 0.3s ease;
+}
+.btn-primary:hover {
+  background: var(--text);
+  color: var(--bg);
+  box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.18), 0 12px 40px -8px rgba(var(--accent-rgb), 0.6);
+}
+.contact-email { background: var(--text); color: var(--bg) !important; }
+.tile-cta-arrow { background: var(--text); color: var(--bg); }
+
+/* ---------- Shimmer gradient type ---------- */
+.grad,
+.stat .num {
+  background: linear-gradient(110deg,
+    var(--accent) 0%, rgb(var(--accent2-rgb)) 30%, var(--accent-strong) 50%,
+    rgb(var(--accent2-rgb)) 70%, var(--accent) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 6s linear infinite;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+.hero.bento .hero-name .letter {
+  display: inline-block;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s;
+}
+.hero.bento .hero-name .letter:hover { transform: translateY(-8px) rotate(-4deg); color: var(--accent); }
+
+/* Soft accent glow behind the intro tile */
+.tile-intro {
+  background:
+    radial-gradient(700px circle at 0% 0%, rgba(var(--accent-rgb), 0.12), transparent 55%),
+    var(--tile);
+}
+.pill { border-color: rgba(var(--accent-rgb), 0.3); background: rgba(var(--accent-rgb), 0.1); color: var(--accent-strong); }
+.pill .dot { background: var(--accent); animation: pill-pulse-accent 2s infinite; }
+@keyframes pill-pulse-accent {
+  0% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.55); }
+  70% { box-shadow: 0 0 0 8px rgba(var(--accent-rgb), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0); }
+}
+:root[data-theme='light'] .pill { color: var(--accent); }
+
+/* ---------- Scroll-driven reveals (Chrome/Edge/Safari 26; ignored elsewhere) ---------- */
+@supports (animation-timeline: view()) {
+  .skill-card, .project, .exp-row, .stat, .about-text, .ai-card, .contact > div {
+    animation: rise-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 70%;
+  }
+  .section-title { animation: title-track linear both; animation-timeline: view(); animation-range: entry 10% cover 40%; }
+}
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(40px) scale(0.97); filter: blur(6px); }
+  to   { opacity: 1; transform: none; filter: blur(0); }
+}
+@keyframes title-track {
+  from { letter-spacing: 0.005em; }
+  to   { letter-spacing: -0.035em; }
+}
+
+/* Chip micro-interaction */
+.skill-chip { transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s, color 0.2s, background 0.2s; }
+.skill-card .skill-chip:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--accent-rgb), 0.5);
+  color: var(--text);
+  background: rgba(var(--accent-rgb), 0.1);
+}
+
+/* Experience timeline accent */
+.exp-row .company { color: var(--accent); }
+.exp-row ul li::before {
+  content: "";
+  top: 0.68em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.6);
+}
+.exp-row ul li { color: var(--text-mid); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ---------- Light-theme fixes for fixed-position controls ---------- */
+:root[data-theme='light'] .btn-primary { background: var(--text); color: var(--bg); }
+:root[data-theme='light'] .chat-launcher,
+:root[data-theme='light'] .accent-toggle,
+:root[data-theme='light'] .accent-swatches {
+  background: var(--glass);
+  color: var(--text);
+  border-color: var(--border-strong);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Tall cards: reveal without blur so text is never fuzzy while reading */
+@supports (animation-timeline: view()) {
+  .exp-row, .project, .about-text, .ai-card, .contact > div { animation-name: rise-in-clean; }
+}
+@keyframes rise-in-clean {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- Section 3D scenes ---------- */
+.scene3d { position: relative; }
+.scene3d canvas { display: block; }
+.section-head {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  align-items: center;
+  gap: 2rem;
+}
+.section-scene {
+  height: 300px;
+  border-radius: var(--radius);
+  background: radial-gradient(circle at 50% 55%, rgba(var(--accent-rgb), 0.14), transparent 65%);
+}
+.contact-card { display: grid; grid-template-columns: 1fr 360px; column-gap: 2rem; align-items: center; }
+.contact-card > :not(.contact-scene) { grid-column: 1; }
+.contact-scene { grid-column: 2; grid-row: 1 / span 5; height: 380px; }
+@media (max-width: 860px) {
+  .section-head, .contact-card { grid-template-columns: 1fr; }
+  .section-scene { height: 220px; order: -1; }
+  .contact-scene { grid-column: 1; grid-row: auto; height: 260px; }
+}
+.contact-card > :not(.contact-scene) { justify-self: start; }
+.contact-card > .contact-title, .contact-card > .contact-body { justify-self: stretch; }
+
+/* =====================================================================
+   PERFORMANCE PASS — nothing below repaints large areas per frame.
+   ===================================================================== */
+.aurora-blob, .aurora-sheen, .aurora-beams, .aurora-grid { display: none !important; }
+.aurora {
+  background:
+    radial-gradient(900px 600px at 15% -10%, rgba(var(--accent-rgb), 0.10), transparent 60%),
+    radial-gradient(800px 500px at 100% 10%, rgba(var(--accent2-rgb), 0.06), transparent 60%),
+    var(--bg);
+}
+.grain { inset: 0; animation: none; }
+.navbar, .navbar.is-scrolled { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.three-bg { display: none; }
+
+/* =====================================================================
+   INCOMING ANIMATIONS — transform + opacity only (GPU composited).
+   Scroll-linked where supported; otherwise elements are simply visible.
+   ===================================================================== */
+@supports (animation-timeline: view()) {
+  .skill-card, .project, .exp-row, .stat, .about-text, .ai-card, .contact > div,
+  .section-eyebrow, .section-scene, .skill-chip, .exp-row ul li, .marquee {
+    animation-timeline: view();
+    animation-fill-mode: both;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Section eyebrow slides in from the left */
+  .section-eyebrow { animation-name: in-left; animation-range: entry 0% entry 100%; }
+
+  /* 3D scenes zoom + spin in */
+  .section-scene { animation-name: in-zoom-spin; animation-range: entry 0% cover 40%; }
+
+  /* Skill cards: rise with a little scale, odd/even offset */
+  .skill-card { animation-name: in-rise-scale; animation-range: entry 0% entry 90%; }
+  .skill-card:nth-child(3n + 2) { animation-range: entry 10% entry 100%; }
+  .skill-card:nth-child(3n) { animation-range: entry 20% cover 20%; }
+
+  /* Chips pop in */
+  .skill-card .skill-chip { animation-name: in-pop; animation-range: entry 20% cover 25%; }
+
+  /* Projects swing in from alternating sides with a 3D flip */
+  .project { animation-name: in-flip-left; animation-range: entry 0% entry 80%; }
+  .project:nth-child(even) { animation-name: in-flip-right; }
+
+  /* Experience cards slide from left, bullets cascade */
+  .exp-row { animation-name: in-left-far; animation-range: entry 0% entry 40%; }
+  .exp-row ul li { animation-name: in-right-small; animation-range: entry 0% entry 100%; }
+
+  /* Stats pop, about text rises */
+  .stat { animation-name: in-pop-big; animation-range: entry 0% entry 90%; }
+  .stat:nth-child(even) { animation-range: entry 15% cover 20%; }
+  .about-text { animation-name: in-rise; animation-range: entry 0% entry 50%; }
+
+  /* AI + contact: scale up from slightly small */
+  .ai-card, .contact > div { animation-name: in-scale-up; animation-range: entry 0% entry 60%; }
+
+  /* Marquee strip unrolls */
+  .marquee { animation-name: in-unroll; animation-range: entry 0% cover 30%; }
+}
+
+@keyframes in-left       { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: none; } }
+@keyframes in-left-far   { from { opacity: 0; transform: translateX(-80px); } to { opacity: 1; transform: none; } }
+@keyframes in-right-small{ from { opacity: 0; transform: translateX(24px); }  to { opacity: 1; transform: none; } }
+@keyframes in-rise       { from { opacity: 0; transform: translateY(48px); }  to { opacity: 1; transform: none; } }
+@keyframes in-rise-scale { from { opacity: 0; transform: translateY(60px) scale(0.92); } to { opacity: 1; transform: none; } }
+@keyframes in-pop        { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: none; } }
+@keyframes in-pop-big    { from { opacity: 0; transform: scale(0.75) translateY(20px); } to { opacity: 1; transform: none; } }
+@keyframes in-scale-up   { from { opacity: 0; transform: scale(0.9) translateY(40px); } to { opacity: 1; transform: none; } }
+@keyframes in-zoom-spin  { from { opacity: 0; transform: scale(0.5) rotate(-20deg); } to { opacity: 1; transform: none; } }
+@keyframes in-unroll     { from { opacity: 0; transform: scaleX(0.6); } to { opacity: 1; transform: none; } }
+@keyframes in-flip-left  {
+  from { opacity: 0; transform: perspective(1200px) translateX(-60px) rotateY(18deg); }
+  to   { opacity: 1; transform: perspective(1200px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+}
+@keyframes in-flip-right {
+  from { opacity: 0; transform: perspective(1200px) translateX(60px) rotateY(-18deg); }
+  to   { opacity: 1; transform: perspective(1200px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+}
+
+/* Experience: accent rail draws down as each card scrolls through */
+.exp-row::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  inset: 0 auto 0 0;
+  border-radius: 3px;
+  background: linear-gradient(var(--accent), rgb(var(--accent2-rgb)));
+  opacity: 1 !important;
+  transform-origin: top;
+  transform: scaleY(1);
+}
+@supports (animation-timeline: view()) {
+  .exp-row::before { animation: rail linear both; animation-timeline: view(); animation-range: entry 20% cover 70%; }
+}
+@keyframes rail { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+/* Hero entrance extras: stack chips + CTA arrow nudge */
+.tile-cta-arrow { animation: nudge 2.4s ease-in-out infinite; }
+@keyframes nudge { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(3px, -3px); } }
+.tile-cta:hover .tile-cta-arrow { animation: none; }
